@@ -1,8 +1,10 @@
 #![feature(unboxed_closures)]
+#![feature(const_trait_impl)]
 
 use fn_grad::*;
 
-pub trait FnDerOnce<Arg>: FnOnce<(Arg,)> + FnGradOnce<(Arg,), Gradient = Self::Derivative>
+#[const_trait]
+pub trait FnDerOnce<Arg>: FnOnce<(Arg,)> + ~const FnGradOnce<(Arg,), Gradient = Self::Derivative>
 {
     type Derivative: FnOnce<(Arg,)> + ?Sized;
 
@@ -15,6 +17,7 @@ pub trait FnDerOnce<Arg>: FnOnce<(Arg,)> + FnGradOnce<(Arg,), Gradient = Self::D
     }
 }
 
+#[const_trait]
 pub trait FnDerMut<Arg>: FnDerOnce<Arg> + FnMut<(Arg,)> + FnGradMut<(Arg,)>
 where
     Self::Derivative: FnMut<(Arg,)>
@@ -25,6 +28,7 @@ where
     }
 }
 
+#[const_trait]
 pub trait FnDer<Arg>: FnDerMut<Arg> + Fn<(Arg,)> + FnGrad<(Arg,)>
 where
     Self::Derivative: Fn<(Arg,)>
