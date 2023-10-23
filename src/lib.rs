@@ -1,5 +1,6 @@
 #![feature(unboxed_closures)]
 #![feature(const_trait_impl)]
+#![feature(const_mut_refs)]
 
 use fn_grad::*;
 
@@ -18,7 +19,7 @@ pub trait FnDerOnce<Arg>: FnOnce<(Arg,)> + ~const FnGradOnce<(Arg,), Gradient = 
 }
 
 #[const_trait]
-pub trait FnDerMut<Arg>: FnDerOnce<Arg> + FnMut<(Arg,)> + FnGradMut<(Arg,)>
+pub trait FnDerMut<Arg>: FnDerOnce<Arg> + FnMut<(Arg,)> + ~const FnGradMut<(Arg,)>
 where
     Self::Derivative: FnMut<(Arg,)>
 {
@@ -29,7 +30,7 @@ where
 }
 
 #[const_trait]
-pub trait FnDer<Arg>: FnDerMut<Arg> + Fn<(Arg,)> + FnGrad<(Arg,)>
+pub trait FnDer<Arg>: FnDerMut<Arg> + Fn<(Arg,)> + ~const FnGrad<(Arg,)>
 where
     Self::Derivative: Fn<(Arg,)>
 {
