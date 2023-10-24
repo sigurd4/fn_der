@@ -1,41 +1,35 @@
 #![feature(unboxed_closures)]
 #![feature(const_trait_impl)]
 #![feature(const_mut_refs)]
+#![feature(associated_type_defaults)]
 
 use fn_grad::*;
 
 #[const_trait]
-pub trait FnDerOnce<Arg>: FnOnce<(Arg,)> + ~const FnGradOnce<(Arg,), Gradient = Self::Derivative>
+pub trait FnDerOnce<Arg>: FnOnce<(Arg,)> + ~const FnGradOnce<(Arg,)>
 {
-    type Derivative: FnOnce<(Arg,)> + ?Sized;
-
-    fn into_derivative(self) -> Self::Derivative
+    fn derivative_once(self, arg: Arg) -> Self::GradientOutput
     where
-        Self: Sized,
-        Self::Derivative: Sized
+        Self: Sized
     {
-        self.into_gradient()
+        self.gradient_once((arg,))
     }
 }
 
 #[const_trait]
 pub trait FnDerMut<Arg>: FnDerOnce<Arg> + FnMut<(Arg,)> + ~const FnGradMut<(Arg,)>
-where
-    Self::Derivative: FnMut<(Arg,)>
 {
-    fn as_derivate_mut(&mut self) -> &mut Self::Derivative
+    fn derivative_mut(&mut self, arg: Arg) -> Self::GradientOutput
     {
-        self.as_gradient_mut()
+        self.gradient_mut((arg,))
     }
 }
 
 #[const_trait]
 pub trait FnDer<Arg>: FnDerMut<Arg> + Fn<(Arg,)> + ~const FnGrad<(Arg,)>
-where
-    Self::Derivative: Fn<(Arg,)>
 {
-    fn as_derivate(&self) -> &Self::Derivative
+    fn derivative(&self, arg: Arg) -> Self::GradientOutput
     {
-        self.as_gradient()
+        self.gradient((arg,))
     }
 }
